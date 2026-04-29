@@ -29,3 +29,14 @@
 2. Файл docker-compose.yml с установкой PostgreSQL и заполненными данными из файлов mock_data(*).csv.
 3. Скрипты DDL (SQL) создания таблиц фактов и измерений в соответствии с моделью снежинка/звезда.
 4. Скрипты DML (SQL) заполнения таблиц фактов и измерений из исходных данных.
+
+## Локальное решение
+
+Готовое решение лабораторной работы находится в [SOLUTION.md](SOLUTION.md).
+
+Короткий запуск:
+
+```powershell
+docker compose up -d
+docker exec -i bd_snowflake_postgres psql -U lab -d snowflake_lab -f /sql/dw/03_validation.sql
+```
