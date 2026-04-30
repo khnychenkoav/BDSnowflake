@@ -15,7 +15,14 @@ FROM stage.mock_data_raw
 GROUP BY source_file
 ORDER BY source_file;
 
-SELECT *
+SELECT
+    fact_rows,
+    source_files,
+    inconsistent_total_rows,
+    min_source_sale_total,
+    max_source_sale_total,
+    min_calculated_total,
+    max_calculated_total
 FROM dw.v_sales_quality_summary;
 
 SELECT
