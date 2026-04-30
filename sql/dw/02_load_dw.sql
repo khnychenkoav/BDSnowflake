@@ -14,39 +14,6 @@ FROM (
 WHERE country_name IS NOT NULL
 ORDER BY country_name;
 
-INSERT INTO dw.dim_date (
-    date_key,
-    full_date,
-    year,
-    quarter,
-    month,
-    month_name,
-    day_of_month,
-    day_of_week,
-    day_name,
-    week_of_year
-)
-SELECT
-    to_char(full_date, 'YYYYMMDD')::integer AS date_key,
-    full_date,
-    extract(year FROM full_date)::smallint AS year,
-    extract(quarter FROM full_date)::smallint AS quarter,
-    extract(month FROM full_date)::smallint AS month,
-    trim(to_char(full_date, 'Month')) AS month_name,
-    extract(day FROM full_date)::smallint AS day_of_month,
-    extract(isodow FROM full_date)::smallint AS day_of_week,
-    trim(to_char(full_date, 'Day')) AS day_name,
-    extract(week FROM full_date)::smallint AS week_of_year
-FROM (
-    SELECT sale_date AS full_date FROM stage.v_mock_data_typed
-    UNION
-    SELECT product_release_date FROM stage.v_mock_data_typed
-    UNION
-    SELECT product_expiry_date FROM stage.v_mock_data_typed
-) dates
-WHERE full_date IS NOT NULL
-ORDER BY full_date;
-
 INSERT INTO dw.dim_product_category (product_category_name)
 SELECT DISTINCT product_category
 FROM stage.v_mock_data_typed
@@ -271,8 +238,8 @@ INSERT INTO dw.dim_product (
     product_description,
     product_rating,
     product_reviews,
-    release_date_key,
-    expiry_date_key
+    product_release_date,
+    product_expiry_date
 )
 SELECT
     s.product_nk_hash,
@@ -287,8 +254,8 @@ SELECT
     s.product_description,
     s.product_rating,
     s.product_reviews,
-    to_char(s.product_release_date, 'YYYYMMDD')::integer,
-    to_char(s.product_expiry_date, 'YYYYMMDD')::integer
+    s.product_release_date,
+    s.product_expiry_date
 FROM (
     SELECT DISTINCT ON (product_nk_hash)
         product_nk_hash,
@@ -324,7 +291,7 @@ INSERT INTO dw.fact_sales (
     source_customer_id,
     source_seller_id,
     source_product_id,
-    sale_date_key,
+    sale_date,
     customer_key,
     seller_key,
     product_key,
@@ -345,7 +312,7 @@ SELECT
     s.sale_customer_id,
     s.sale_seller_id,
     s.sale_product_id,
-    to_char(s.sale_date, 'YYYYMMDD')::integer,
+    s.sale_date,
     c.customer_key,
     se.seller_key,
     p.product_key,
@@ -381,7 +348,7 @@ FROM dw.fact_sales;
 CREATE OR REPLACE VIEW dw.v_sales_enriched AS
 SELECT
     f.sale_key,
-    d.full_date AS sale_date,
+    f.sale_date,
     f.source_file,
     c.email AS customer_email,
     c.first_name AS customer_first_name,
@@ -399,7 +366,6 @@ SELECT
     f.calculated_total_amount,
     f.is_total_consistent
 FROM dw.fact_sales f
-JOIN dw.dim_date d ON d.date_key = f.sale_date_key
 JOIN dw.dim_customer c ON c.customer_key = f.customer_key
 JOIN dw.dim_seller seller ON seller.seller_key = f.seller_key
 JOIN dw.dim_product p ON p.product_key = f.product_key
@@ -410,7 +376,6 @@ JOIN dw.dim_supplier sup ON sup.supplier_key = f.supplier_key
 JOIN dw.dim_pet pet ON pet.pet_key = f.pet_key;
 
 ANALYZE dw.dim_country;
-ANALYZE dw.dim_date;
 ANALYZE dw.dim_product_category;
 ANALYZE dw.dim_product_brand;
 ANALYZE dw.dim_product_material;

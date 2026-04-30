@@ -8,7 +8,6 @@ UNION ALL SELECT 'dw.dim_store', count(*) FROM dw.dim_store
 UNION ALL SELECT 'dw.dim_supplier', count(*) FROM dw.dim_supplier
 UNION ALL SELECT 'dw.dim_pet', count(*) FROM dw.dim_pet
 UNION ALL SELECT 'dw.dim_country', count(*) FROM dw.dim_country
-UNION ALL SELECT 'dw.dim_date', count(*) FROM dw.dim_date
 ORDER BY object_name;
 
 SELECT source_file, count(*) AS rows_count

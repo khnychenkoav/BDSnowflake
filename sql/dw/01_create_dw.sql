@@ -6,19 +6,6 @@ CREATE TABLE dw.dim_country (
     country_name text NOT NULL UNIQUE
 );
 
-CREATE TABLE dw.dim_date (
-    date_key integer PRIMARY KEY,
-    full_date date NOT NULL UNIQUE,
-    year smallint NOT NULL,
-    quarter smallint NOT NULL,
-    month smallint NOT NULL,
-    month_name text NOT NULL,
-    day_of_month smallint NOT NULL,
-    day_of_week smallint NOT NULL,
-    day_name text NOT NULL,
-    week_of_year smallint NOT NULL
-);
-
 CREATE TABLE dw.dim_product_category (
     product_category_key integer GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
     product_category_name text NOT NULL UNIQUE
@@ -125,9 +112,9 @@ CREATE TABLE dw.dim_product (
     product_description text NOT NULL,
     product_rating numeric(3, 1) NOT NULL CHECK (product_rating BETWEEN 0 AND 5),
     product_reviews integer NOT NULL CHECK (product_reviews >= 0),
-    release_date_key integer NOT NULL REFERENCES dw.dim_date (date_key),
-    expiry_date_key integer NOT NULL REFERENCES dw.dim_date (date_key),
-    CHECK (expiry_date_key > release_date_key)
+    product_release_date date NOT NULL,
+    product_expiry_date date NOT NULL,
+    CHECK (product_expiry_date > product_release_date)
 );
 
 CREATE TABLE dw.fact_sales (
@@ -138,7 +125,7 @@ CREATE TABLE dw.fact_sales (
     source_customer_id integer NOT NULL,
     source_seller_id integer NOT NULL,
     source_product_id integer NOT NULL,
-    sale_date_key integer NOT NULL REFERENCES dw.dim_date (date_key),
+    sale_date date NOT NULL,
     customer_key integer NOT NULL REFERENCES dw.dim_customer (customer_key),
     seller_key integer NOT NULL REFERENCES dw.dim_seller (seller_key),
     product_key integer NOT NULL REFERENCES dw.dim_product (product_key),
@@ -153,7 +140,7 @@ CREATE TABLE dw.fact_sales (
     is_total_consistent boolean NOT NULL
 );
 
-CREATE INDEX ix_fact_sales_sale_date ON dw.fact_sales (sale_date_key);
+CREATE INDEX ix_fact_sales_sale_date ON dw.fact_sales (sale_date);
 CREATE INDEX ix_fact_sales_customer ON dw.fact_sales (customer_key);
 CREATE INDEX ix_fact_sales_seller ON dw.fact_sales (seller_key);
 CREATE INDEX ix_fact_sales_product ON dw.fact_sales (product_key);

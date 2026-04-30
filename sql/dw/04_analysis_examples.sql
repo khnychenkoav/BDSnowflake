@@ -1,14 +1,13 @@
 SELECT
-    d.year,
-    d.month,
+    extract(year FROM f.sale_date)::integer AS sales_year,
+    extract(month FROM f.sale_date)::integer AS sales_month,
     count(*) AS sales_count,
     sum(f.source_sale_total_amount) AS source_revenue,
     sum(f.calculated_total_amount) AS calculated_revenue,
     sum(f.calculated_total_amount - f.source_sale_total_amount) AS revenue_delta
 FROM dw.fact_sales f
-JOIN dw.dim_date d ON d.date_key = f.sale_date_key
-GROUP BY d.year, d.month
-ORDER BY d.year, d.month;
+GROUP BY sales_year, sales_month
+ORDER BY sales_year, sales_month;
 
 SELECT
     product_category_name,

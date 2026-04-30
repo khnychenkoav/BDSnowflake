@@ -1,6 +1,6 @@
 # Решение
 
-Репозиторий дополнен PostgreSQL контуром и SQL слоем для трансформации CSV исходных данных в аналитическую модель снежинка/звезда
+Репозиторий дополнен PostgreSQL контуром и SQL слоем для трансформации CSV исходных данных в аналитическую модель снежинка
 
 Основные файлы:
 
@@ -33,6 +33,8 @@ docker exec -i bd_snowflake_postgres psql -U lab -d snowflake_lab -f /sql/dw/03_
 
 - `dw.fact_sales`
 
+Фактическая модель - снежинка: вокруг `dw.fact_sales` оставлены основные измерения, а повторяющиеся справочные атрибуты продукта, питомца и страны вынесены в отдельные нормализованные таблицы.
+
 Измерения:
 
 - `dw.dim_customer`
@@ -41,7 +43,6 @@ docker exec -i bd_snowflake_postgres psql -U lab -d snowflake_lab -f /sql/dw/03_
 - `dw.dim_supplier`
 - `dw.dim_product`
 - `dw.dim_pet`
-- `dw.dim_date`
 - `dw.dim_country`
 - `dw.dim_product_category`
 - `dw.dim_product_brand`
@@ -56,7 +57,6 @@ docker exec -i bd_snowflake_postgres psql -U lab -d snowflake_lab -f /sql/dw/03_
 
 ```mermaid
 erDiagram
-    FACT_SALES }o--|| DIM_DATE : sale_date_key
     FACT_SALES }o--|| DIM_CUSTOMER : customer_key
     FACT_SALES }o--|| DIM_SELLER : seller_key
     FACT_SALES }o--|| DIM_PRODUCT : product_key
@@ -91,4 +91,3 @@ erDiagram
 - Каждый из 10 CSV-файлов загружен по 1000 строк
 - Разрывов по foreign key нет
 - sale_total_price не совпадает с product_price * sale_quantity во всех 10000 строках, не совсем понятно как это интерпретировать, спишем на data quality issue
-
